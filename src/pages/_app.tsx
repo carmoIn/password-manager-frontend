@@ -52,12 +52,12 @@ function MyApp({ Component, emotionCache = clientSideEmotionCache, pageProps }: 
 
     function authCheck(url) {
         // redirect to login page if accessing a private page and not logged in
-        const publicPaths = ['/login', '/register']
+        const publicPaths = ['/auth/login', '/auth/register']
         const path = url.split('?')[0]
         if (!UserService.getAuthenticatedToken() && !publicPaths.includes(path)) {
             setAuthorized(false)
             router.push({
-                pathname: '/login',
+                pathname: '/auth/login',
                 query: { returnUrl: router.asPath },
             })
         } else {

@@ -60,7 +60,7 @@ export default function Login() {
                 </Button>
                 <Grid container>
                     <Grid item>
-                        <Link href='#' variant='body2'>
+                        <Link href='/auth/register' variant='body2'>
                             Não possui uma conta? Registre-se
                         </Link>
                     </Grid>
