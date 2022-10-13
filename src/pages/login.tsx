@@ -5,15 +5,31 @@ import Link from '@mui/material/Link'
 import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
 import { Layout } from '@/components/accounts'
+import UserService from '@/services/user.service'
+import { FormLogin } from '@/types/auth.types'
+import { useRouter } from 'next/router'
 
 export default function Login() {
+    const router = useRouter()
+
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
         const data = new FormData(event.currentTarget)
         console.log({
-            email: data.get('email'),
+            email: data.get('username'),
             password: data.get('password'),
         })
+        if (data.get('username') && data.get('password')) {
+            const userLogin: FormLogin = {
+                username: data.get('username') as string,
+                password: data.get('password') as string,
+            }
+
+            UserService.login(userLogin).then(() => {
+                const returnUrl = router.query.returnUrl || '/'
+                router.push(returnUrl.toString())
+            })
+        }
     }
 
     return (

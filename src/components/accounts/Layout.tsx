@@ -10,6 +10,7 @@ import Button from '@mui/material/Button'
 import Link from '@mui/material/Link'
 import * as React from 'react'
 import { Copyright } from '@/components/accounts/Copyright'
+import UserService from '@/services/user.service'
 
 export { Layout }
 
@@ -21,8 +22,9 @@ function Layout({ children }: LayoutProps) {
     const router = useRouter()
 
     useEffect(() => {
-        // redirect to home if already logged in
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        if (UserService.getAuthenticatedToken()) {
+            router.push('/')
+        }
     }, [])
 
     return (
