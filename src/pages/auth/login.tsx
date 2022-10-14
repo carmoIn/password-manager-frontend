@@ -12,20 +12,14 @@ import { useRouter } from 'next/router'
 export default function Login() {
     const router = useRouter()
 
+    const [login, setLogin] = React.useState<FormLogin>({})
+
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
         const data = new FormData(event.currentTarget)
-        console.log({
-            email: data.get('username'),
-            password: data.get('password'),
-        })
-        if (data.get('username') && data.get('password')) {
-            const userLogin: FormLogin = {
-                username: data.get('username') as string,
-                password: data.get('password') as string,
-            }
-
-            UserService.login(userLogin).then(() => {
+        console.log(login)
+        if (login.password && login.username) {
+            UserService.login(login).then(() => {
                 const returnUrl = router.query.returnUrl || '/'
                 router.push(returnUrl.toString())
             })
@@ -43,6 +37,8 @@ export default function Login() {
                     label='Usuário'
                     name='username'
                     autoComplete='fname'
+                    value={login.username}
+                    onChange={e => setLogin({...login, username: e.target.value })}
                     autoFocus
                 />
                 <TextField
@@ -53,6 +49,8 @@ export default function Login() {
                     label='Password'
                     type='password'
                     id='password'
+                    value={login.password}
+                    onChange={e => setLogin({...login, password: e.target.value })}
                     autoComplete='current-password'
                 />
                 <Button type='submit' fullWidth variant='contained' sx={{ mt: 3, mb: 2 }}>
