@@ -46,7 +46,7 @@ export default function Register() {
                     label='E-mail'
                     name='email'
                     autoComplete='email'
-                    value={registerUser.name}
+                    value={registerUser.email}
                     onChange={e => setRegisterUser({...registerUser, email: e.target.value })}
                     autoFocus
                 />
@@ -57,7 +57,7 @@ export default function Register() {
                     id='username'
                     label='Usuário'
                     name='username'
-                    value={registerUser.name}
+                    value={registerUser.username}
                     onChange={e => setRegisterUser({...registerUser, username: e.target.value })}
                     autoComplete='fname'
                 />
@@ -66,10 +66,10 @@ export default function Register() {
                     required
                     fullWidth
                     name='password'
-                    label='Password'
+                    label='Senha'
                     type='password'
                     id='password'
-                    value={registerUser.name}
+                    value={registerUser.password}
                     onChange={e => setRegisterUser({...registerUser, password: e.target.value })}
                     autoComplete='current-password'
                 />
