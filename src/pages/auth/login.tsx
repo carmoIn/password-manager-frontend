@@ -16,7 +16,6 @@ export default function Login() {
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
-        const data = new FormData(event.currentTarget)
         console.log(login)
         if (login.password && login.username) {
             UserService.login(login).then(() => {
