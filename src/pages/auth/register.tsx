@@ -6,28 +6,19 @@ import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
 import { Layout } from '@/components/accounts'
 import UserService from '@/services/user.service'
-import { FormLogin } from '@/types/auth.types'
+import { FormRegister } from '@/types/auth.types'
 import { useRouter } from 'next/router'
 
 export default function Register() {
     const router = useRouter()
+    const [registerUser, setRegisterUser] = React.useState<FormRegister>({})
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
-        const data = new FormData(event.currentTarget)
-        console.log({
-            email: data.get('username'),
-            password: data.get('password'),
-        })
-        if (data.get('username') && data.get('password')) {
-            const userLogin: FormLogin = {
-                username: data.get('username') as string,
-                password: data.get('password') as string,
-            }
-
-            UserService.login(userLogin).then(() => {
-                const returnUrl = router.query.returnUrl || '/'
-                router.push(returnUrl.toString())
+        console.log(registerUser)
+        if (registerUser) {
+            UserService.login(registerUser).then(() => {
+                router.push('/auth/login')
             })
         }
     }
@@ -39,11 +30,36 @@ export default function Register() {
                     margin='normal'
                     required
                     fullWidth
+                    id='name'
+                    label='Nome Completo'
+                    name='name'
+                    autoComplete='fname'
+                    value={registerUser.name}
+                    onChange={e => setRegisterUser({...registerUser, name: e.target.value })}
+                    autoFocus
+                />
+                <TextField
+                    margin='normal'
+                    required
+                    fullWidth
+                    id='email'
+                    label='E-mail'
+                    name='email'
+                    autoComplete='email'
+                    value={registerUser.name}
+                    onChange={e => setRegisterUser({...registerUser, email: e.target.value })}
+                    autoFocus
+                />
+                <TextField
+                    margin='normal'
+                    required
+                    fullWidth
                     id='username'
                     label='Usuário'
                     name='username'
+                    value={registerUser.name}
+                    onChange={e => setRegisterUser({...registerUser, username: e.target.value })}
                     autoComplete='fname'
-                    autoFocus
                 />
                 <TextField
                     margin='normal'
@@ -53,10 +69,12 @@ export default function Register() {
                     label='Password'
                     type='password'
                     id='password'
+                    value={registerUser.name}
+                    onChange={e => setRegisterUser({...registerUser, password: e.target.value })}
                     autoComplete='current-password'
                 />
                 <Button type='submit' fullWidth variant='contained' sx={{ mt: 3, mb: 2 }}>
-                    Login
+                    Registrar
                 </Button>
                 <Grid container>
                     <Grid item>
