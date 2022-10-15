@@ -7,25 +7,11 @@ import { useEffect, useState } from 'react'
 import { PasswordClient } from '@/client/password.client'
 
 const Home: NextPage = () => {
-    const [passwordList, setPasswordList] = useState<PasswordCollection>()
-
-    useEffect(() => {
-        loadPasswordList()
-
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
-
-    function loadPasswordList() {
-        new PasswordClient().list().then((passwords) => {
-            setPasswordList(passwords)
-        })
-    }
-
     return (
         <Paper>
             <NabBar />
             <Box component='main'>
-                <EnhancedTable rows={passwordList?._embedded.passwords || new Array<Password>()} />
+                <EnhancedTable />
             </Box>
         </Paper>
     )

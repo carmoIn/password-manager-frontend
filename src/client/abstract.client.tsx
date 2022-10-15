@@ -11,10 +11,15 @@ export abstract class AbstractClient<
 > {
     protected axiosClient: AxiosInstance
 
+    defaultHeader: object = {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+    }
+
     protected constructor(endpoint: string) {
         this.axiosClient = axios.create({
             baseURL: `${process.env.NEXT_PUBLIC_API_URL}/${endpoint}`,
-            headers: { Accept: 'application/json', 'Content-type': 'application/json' },
+            headers: this.defaultHeader,
         })
     }
 
@@ -35,6 +40,7 @@ export abstract class AbstractClient<
     }
 
     public async updateEntity(entity: ApiLink, updated: T): Promise<T> {
+        delete updated['_links']
         return this.put(entity.href, updated)
     }
 
@@ -45,49 +51,20 @@ export abstract class AbstractClient<
         return this.fetchEndpoint('', null, headers, 'GET')
     }
 
-    public isofetch(url: string, data: object | null, type: string): Promise<any> {
-        return this.axiosClient<U>(`${url}`, {
-            data: JSON.stringify({ ...data }),
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-            },
-            method: type,
-        })
-            .then(this.handleResponse)
-            .catch((error) => {
-                throw error
-            })
-    }
-
     public get(url: string): Promise<any> {
-        const headers = {
-            ...this.authHeader(),
-        }
-        return this.fetchFromURL(url, null, headers, 'GET')
+        return this.fetchFromURL(url, null, this.authHeader(), 'GET')
     }
 
     public post(url: string, data: object): Promise<T> {
-        const headers = {
-            ...this.authHeader(),
-        }
-        return this.fetchEndpoint(url, data, headers, 'POST')
+        return this.fetchEndpoint(url, data, this.authHeader(), 'POST')
     }
 
     public delete(url: string): Promise<void> {
-        const headers = {
-            ...this.authHeader(),
-        }
-        return this.fetchFromURL(url, null, headers, 'DELETE')
+        return this.fetchFromURL(url, null, this.authHeader(), 'DELETE')
     }
 
     public put(url: string, data: T): Promise<T> {
-        const headers = {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-            ...this.authHeader(),
-        }
-        return this.fetchFromURL(url, data, headers, 'PUT')
+        return this.fetchFromURL(url, data, this.authHeader(), 'PUT')
     }
 
     private authHeader() {
@@ -104,7 +81,10 @@ export abstract class AbstractClient<
         return (
             await axios<any>(url, {
                 data: JSON.stringify({ ...data }),
-                headers: headers,
+                headers: {
+                    ...this.defaultHeader,
+                    ...headers,
+                },
                 method: type,
             }).catch(this.handleResponse)
         ).data
@@ -120,7 +100,9 @@ export abstract class AbstractClient<
         return (
             await this.axiosClient<any>(url, {
                 data: JSON.stringify({ ...data }),
-                headers: headers,
+                headers: {
+                    ...headers,
+                },
                 method: type,
             }).catch(this.handleResponse)
         ).data
