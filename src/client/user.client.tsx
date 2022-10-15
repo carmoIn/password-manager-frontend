@@ -7,11 +7,7 @@ export class UserClient extends AbstractClient<User, UserCollection> {
         super('users')
     }
 
-    async login(username: string, password: string): Promise<any> {
-        try {
-            return await this.axiosClient.post('/login', { username, password })
-        } catch (error: any) {
-            return Promise.reject(error.response)
-        }
+    public login(username: string, password: string): Promise<any> {
+        return this.fetchEndpoint('/login', { username, password }, {}, 'POST')
     }
 }
