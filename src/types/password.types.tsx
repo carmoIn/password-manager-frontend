@@ -15,6 +15,7 @@ export class Password implements AbstractEntity {
     password: string
     _links!: PasswordLinks
     active: boolean
+    user?: string
 
     constructor() {
         this.name = ''

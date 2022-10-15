@@ -14,7 +14,12 @@ import Slide from '@mui/material/Slide'
 import { TransitionProps } from '@mui/material/transitions'
 import PropTypes from 'prop-types'
 import TextField from '@mui/material/TextField'
-import { Box, Container } from '@mui/material'
+import { Backdrop, Box, CircularProgress, Container } from '@mui/material'
+import { ApiLink } from '@/types/api-link.types'
+import { useEffect, useState } from 'react'
+import { ModalProp } from '@/interfaces/modal.interface'
+import { PasswordClient } from '@/client/password.client'
+import { Password } from '@/types/password.types'
 
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & {
@@ -26,22 +31,62 @@ const Transition = React.forwardRef(function Transition(
 })
 
 interface Props {
-    show: boolean
-    setOpen: (open: boolean) => void
+    show: ModalProp
+    setOpen: (prop: ModalProp) => void
 }
 
 export default function PasswordModal({ show, setOpen }: Props) {
-    const handleClickOpen = () => {
-        setOpen(true)
-    }
+    const [loading, setLoading] = useState<boolean>(true)
+    const [item, setItem] = useState<Password>(new Password())
+
+    useEffect(() => {
+        if (show.edited != null) {
+            new PasswordClient().get(show.edited).then((password) => {
+                console.log('chamou')
+                setItem(password)
+                setLoading(false)
+            })
+        } else {
+            setItem(new Password())
+            setLoading(false)
+        }
+    }, [show])
 
     const handleClose = () => {
-        setOpen(false)
+        setOpen({ open: false, edited: null })
     }
+
+    const handleSubmit = () => {
+        setLoading(true)
+        if (item) {
+            item.user = '/2'
+            new PasswordClient().createEntity(item).then((password) => {
+                setItem(password)
+                setLoading(false)
+                setOpen({ open: false, edited: password._links.self.href })
+            })
+        }
+    }
+
+    const onModalChange = (prop: ModalProp): void => {
+        console.log('testando retorno ' + prop.open + ' ' + prop.edited)
+    }
+    setOpen.bind(onModalChange)
 
     return (
         <div>
-            <Dialog fullScreen open={show} onClose={handleClose} TransitionComponent={Transition}>
+            <Backdrop
+                sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+                open={loading}
+            >
+                <CircularProgress color='inherit' />
+            </Backdrop>
+            <Dialog
+                fullScreen
+                open={show.open}
+                onClose={handleClose}
+                TransitionComponent={Transition}
+            >
                 <AppBar sx={{ position: 'relative' }}>
                     <Toolbar>
                         <IconButton
@@ -55,7 +100,7 @@ export default function PasswordModal({ show, setOpen }: Props) {
                         <Typography sx={{ ml: 2, flex: 1 }} variant='h6' component='div'>
                             Senha
                         </Typography>
-                        <Button autoFocus color='inherit' onClick={handleClose}>
+                        <Button autoFocus color='inherit' onClick={handleSubmit}>
                             Salvar
                         </Button>
                     </Toolbar>
@@ -70,7 +115,7 @@ export default function PasswordModal({ show, setOpen }: Props) {
                         }}
                     >
                         <Typography component='h1' variant='h5'>
-                            Site Tal
+                            {show.edited ? 'Editando ' + item.name : 'Nova Senha'}
                         </Typography>
                         <Box component='form' noValidate sx={{ mt: 1 }}>
                             <TextField
@@ -80,6 +125,10 @@ export default function PasswordModal({ show, setOpen }: Props) {
                                 id='name'
                                 label='Nome do Site'
                                 name='name'
+                                value={item.name}
+                                onChange={(e) =>
+                                    setItem({ ...item, name: e.target.value } as Password)
+                                }
                                 autoFocus
                             />
                             <TextField
@@ -90,6 +139,10 @@ export default function PasswordModal({ show, setOpen }: Props) {
                                 label='Endereço do Site'
                                 name='site'
                                 autoComplete='site'
+                                value={item.site}
+                                onChange={(e) =>
+                                    setItem({ ...item, site: e.target.value } as Password)
+                                }
                                 autoFocus
                             />
                             <TextField
@@ -101,6 +154,10 @@ export default function PasswordModal({ show, setOpen }: Props) {
                                 type='password'
                                 id='password'
                                 autoComplete='current-password'
+                                value={item.password}
+                                onChange={(e) =>
+                                    setItem({ ...item, password: e.target.value } as Password)
+                                }
                             />
                         </Box>
                     </Box>

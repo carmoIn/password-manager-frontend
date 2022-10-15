@@ -16,10 +16,14 @@ import Checkbox from '@mui/material/Checkbox'
 import IconButton from '@mui/material/IconButton'
 import Tooltip from '@mui/material/Tooltip'
 import DeleteIcon from '@mui/icons-material/Delete'
-import FilterListIcon from '@mui/icons-material/FilterList'
+import { AddBox } from '@mui/icons-material'
 import { visuallyHidden } from '@mui/utils'
 import PasswordModal from '@/components/ui/PasswordModal'
 import { Password, PasswordCollection } from '@/types/password.types'
+import { ApiLink } from '@/types/api-link.types'
+import { ModalProp } from '@/interfaces/modal.interface'
+import { useEffect, useState } from 'react'
+import { PasswordClient } from '@/client/password.client'
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
     if (b[orderBy] < a[orderBy]) {
@@ -141,10 +145,11 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 
 interface EnhancedTableToolbarProps {
     numSelected: number
+    setOpen: (prop: ModalProp) => void
 }
 
 const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
-    const { numSelected } = props
+    const { numSelected, setOpen } = props
 
     return (
         <Toolbar
@@ -178,9 +183,9 @@ const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
                     </IconButton>
                 </Tooltip>
             ) : (
-                <Tooltip title='Filter list'>
+                <Tooltip title='Nova Senha'>
                     <IconButton>
-                        <FilterListIcon />
+                        <AddBox onClick={() => setOpen({ open: true, edited: null })} />
                     </IconButton>
                 </Tooltip>
             )}
@@ -188,17 +193,26 @@ const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
     )
 }
 
-interface Props {
-    rows: Password[]
-}
-
-export default function EnhancedTable({ rows }: Props) {
+export default function EnhancedTable() {
     const [order, setOrder] = React.useState<Order>('asc')
     const [orderBy, setOrderBy] = React.useState<keyof Password>('name')
     const [selected, setSelected] = React.useState<readonly string[]>([])
     const [page, setPage] = React.useState(0)
     const [rowsPerPage, setRowsPerPage] = React.useState(15)
-    const [showPassword, setShowPassword] = React.useState(false)
+    const [showPassword, setShowPassword] = React.useState<ModalProp>(new ModalProp())
+    const [rows, setRows] = useState<Password[]>(new Array<Password>())
+
+    useEffect(() => {
+        loadPasswordList()
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
+
+    function loadPasswordList() {
+        new PasswordClient().list().then((passwords) => {
+            setRows(passwords?._embedded.passwords || new Array<Password>())
+        })
+    }
 
     const handleRequestSort = (event: React.MouseEvent<unknown>, property: keyof Password) => {
         const isAsc = orderBy === property && order === 'asc'
@@ -219,7 +233,7 @@ export default function EnhancedTable({ rows }: Props) {
         const selectedIndex = selected.indexOf(name)
         let newSelected: readonly string[] = []
 
-        setShowPassword(true)
+        setShowPassword({ open: true, edited: name })
         console.log('abriu modal')
 
         if (selectedIndex === -1) {
@@ -249,11 +263,19 @@ export default function EnhancedTable({ rows }: Props) {
 
     const isSelected = (name: string) => selected.indexOf(name) !== -1
 
+    const onModalChange = (prop: ModalProp) => {
+        setShowPassword(prop)
+        if (prop.edited) {
+            loadPasswordList()
+        }
+        console.log('Datagrid testando retorno ' + prop.open + ' ' + prop.edited)
+    }
+
     return (
         <Box sx={{ display: 'flex', overflow: 'hidden' }}>
             <Paper sx={{ width: '100%' }}>
-                <EnhancedTableToolbar numSelected={selected.length} />
-                <PasswordModal show={showPassword} setOpen={setShowPassword} />
+                <EnhancedTableToolbar setOpen={onModalChange} numSelected={selected.length} />
+                <PasswordModal show={showPassword} setOpen={onModalChange} />
                 <TableContainer sx={{ height: '80vh' }}>
                     <Table
                         sx={{ minWidth: 750 }}
