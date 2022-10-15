@@ -2,11 +2,25 @@ import { NabBar } from '@/components/ui/NavBar'
 import EnhancedTable from '@/components/ui/DataGrid'
 import { Box, Paper } from '@mui/material'
 import type { NextPage } from 'next'
-import Head from 'next/head'
-import Image from 'next/image'
-import styles from '../styles/Home.module.css'
+import { Password, PasswordCollection } from '@/types/password.types'
+import { useEffect, useState } from 'react'
+import { PasswordClient } from '@/client/password.client'
 
 const Home: NextPage = () => {
+    const [passwordList, setPasswordList] = useState<PasswordCollection>()
+
+    useEffect(() => {
+        loadPasswordList()
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
+
+    function loadPasswordList() {
+        new PasswordClient().list().then((passwords) => {
+            setPasswordList(passwords)
+        })
+    }
+
     return (
         <Paper>
             <NabBar />

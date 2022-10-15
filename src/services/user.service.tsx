@@ -25,7 +25,6 @@ class UserService extends AbstractService<User, UserCollection> {
 
                 return user
             })
-            .catch()
     }
 
     public logout() {
