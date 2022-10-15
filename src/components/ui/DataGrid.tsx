@@ -275,21 +275,23 @@ export default function EnhancedTable({ rows }: Props) {
                             {stableSort(rows, getComparator(order, orderBy))
                                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                 .map((row, index) => {
-                                    const isItemSelected = isSelected(row.name)
+                                    const isItemSelected = isSelected(row._links.self.href)
                                     const labelId = `enhanced-table-checkbox-${index}`
 
                                     return (
                                         <TableRow
                                             hover
-                                            onClick={(event) => handleClick(event, row.name)}
                                             role='checkbox'
                                             aria-checked={isItemSelected}
                                             tabIndex={-1}
-                                            key={row.name}
+                                            key={row._links.self.href}
                                             selected={isItemSelected}
                                         >
                                             <TableCell padding='checkbox'>
                                                 <Checkbox
+                                                    onClick={(event) =>
+                                                        handleClick(event, row._links.self.href)
+                                                    }
                                                     color='primary'
                                                     checked={isItemSelected}
                                                     inputProps={{
