@@ -31,7 +31,7 @@ export abstract class AbstractClient<
     }
 
     public async createEntity(entity: T): Promise<T> {
-        return this.post(entity)
+        return this.post('', entity)
     }
 
     public async updateEntity(entity: ApiLink, updated: T): Promise<T> {
@@ -67,11 +67,11 @@ export abstract class AbstractClient<
         return this.fetchFromURL(url, null, headers, 'GET')
     }
 
-    public post(data: T): Promise<T> {
+    public post(url: string, data: object): Promise<T> {
         const headers = {
             ...this.authHeader(),
         }
-        return this.fetchEndpoint('', data, headers, 'POST')
+        return this.fetchEndpoint(url, data, headers, 'POST')
     }
 
     public delete(url: string): Promise<void> {
@@ -100,47 +100,46 @@ export abstract class AbstractClient<
         }
     }
 
-    private fetchFromURL(
-        url: string,
-        data: object | null,
-        headers: any,
-        type: string,
-    ): Promise<any> {
-        return axios<any>(`${process.env.NEXT_PUBLIC_API_URL}${url}`, {
-            data: JSON.stringify({ ...data }),
-            headers: headers,
-            method: type,
-        }).then(this.handleResponse)
+    async fetchFromURL(url: string, data: object | null, headers: any, type: string): Promise<any> {
+        return (
+            await axios<any>(url, {
+                data: JSON.stringify({ ...data }),
+                headers: headers,
+                method: type,
+            }).catch(this.handleResponse)
+        ).data
     }
 
-    private fetchEndpoint(
+    async fetchEndpoint(
         url: string,
         data: object | null,
         headers: any,
         type: string,
     ): Promise<any> {
-        return this.axiosClient<any>(`${process.env.NEXT_PUBLIC_API_URL}${url}`, {
-            data: JSON.stringify({ ...data }),
-            headers: headers,
-            method: type,
-        }).then(this.handleResponse)
+        console.log(headers)
+        return (
+            await this.axiosClient<any>(url, {
+                data: JSON.stringify({ ...data }),
+                headers: headers,
+                method: type,
+            }).catch(this.handleResponse)
+        ).data
     }
 
     private handleResponse(response) {
-        return response.text().then((text) => {
-            const data = text && JSON.parse(text)
+        console.log(response)
+        const data = response
 
-            if (!response.ok) {
-                if ([401, 403].includes(response.status) && UserService.getAuthenticatedToken()) {
-                    // auto logout if 401 Unauthorized or 403 Forbidden response returned from api
-                    UserService.logout()
-                }
-
-                const error = (data && data.message) || response.statusText
-                return Promise.reject(error)
+        if (!response.ok) {
+            if ([401, 403].includes(response.status) && UserService.getAuthenticatedToken()) {
+                // auto logout if 401 Unauthorized or 403 Forbidden response returned from api
+                UserService.logout()
             }
 
-            return data
-        })
+            const error = (data && data.message) || response.statusText
+            return Promise.reject(error)
+        }
+
+        return data
     }
 }
