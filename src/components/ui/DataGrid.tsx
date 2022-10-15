@@ -330,7 +330,9 @@ export default function EnhancedTable() {
                                                 {row.name}
                                             </TableCell>
                                             <TableCell align='left'>{row.site}</TableCell>
-                                            <TableCell align='right'>{row.password}</TableCell>
+                                            <TableCell align='right'>
+                                                {atob(row.password as string)}
+                                            </TableCell>
                                         </TableRow>
                                     )
                                 })}

@@ -37,7 +37,7 @@ interface Props {
 
 export default function PasswordModal({ show, setOpen }: Props) {
     const [loading, setLoading] = useState<boolean>(true)
-    const [item, setItem] = useState<Password>(new Password())
+    const [item, setItem] = useState<Password>(() => new Password())
 
     useEffect(() => {
         if (show.edited != null) {
@@ -47,7 +47,7 @@ export default function PasswordModal({ show, setOpen }: Props) {
                 setLoading(false)
             })
         } else {
-            setItem(new Password())
+            setItem(() => new Password())
             setLoading(false)
         }
     }, [show])
@@ -60,6 +60,7 @@ export default function PasswordModal({ show, setOpen }: Props) {
         setLoading(true)
         if (item) {
             item.user = '/2'
+            item.password = btoa(item.password)
 
             if (show.edited) {
                 new PasswordClient().updateEntity({ href: show.edited }, item).then((password) => {
