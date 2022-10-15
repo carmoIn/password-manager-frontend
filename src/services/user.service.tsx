@@ -1,22 +1,31 @@
 import Cookie from 'universal-cookie'
 import Router from 'next/router'
 import { FormLogin, TokenResponse } from '@/types/auth.types'
-import FetchService from '@/services/fetch.service'
+import { AbstractService } from '@/services/abstract.service'
+import { User, UserCollection } from '@/types/user.types'
+import { UserClient } from '@/client/user.client'
 
-class UserService {
+class UserService extends AbstractService<User, UserCollection> {
+    constructor() {
+        super(new UserClient())
+    }
+
     public getAuthenticatedToken() {
         const cookies = new Cookie()
         return cookies.get('token')
     }
 
     public login(login: FormLogin) {
-        return FetchService.post(`/login`, login).then((user: TokenResponse) => {
-            // publish user to subscribers and store in local storage to stay logged in between page refreshes
-            const cookies = new Cookie()
-            cookies.set('token', user.access_token)
+        return new UserClient()
+            .login(login.username, login.password)
+            .then((user: TokenResponse) => {
+                // publish user to subscribers and store in local storage to stay logged in between page refreshes
+                const cookies = new Cookie()
+                cookies.set('token', user.access_token)
 
-            return user
-        })
+                return user
+            })
+            .catch()
     }
 
     public logout() {
