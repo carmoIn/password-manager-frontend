@@ -60,11 +60,20 @@ export default function PasswordModal({ show, setOpen }: Props) {
         setLoading(true)
         if (item) {
             item.user = '/2'
-            new PasswordClient().createEntity(item).then((password) => {
-                setItem(password)
-                setLoading(false)
-                setOpen({ open: false, edited: password._links.self.href })
-            })
+
+            if (show.edited) {
+                new PasswordClient().updateEntity({ href: show.edited }, item).then((password) => {
+                    setItem(password)
+                    setLoading(false)
+                    setOpen({ open: false, edited: password._links.self.href })
+                })
+            } else {
+                new PasswordClient().createEntity(item).then((password) => {
+                    setItem(password)
+                    setLoading(false)
+                    setOpen({ open: false, edited: password._links.self.href })
+                })
+            }
         }
     }
 

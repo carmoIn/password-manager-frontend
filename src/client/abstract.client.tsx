@@ -11,10 +11,15 @@ export abstract class AbstractClient<
 > {
     protected axiosClient: AxiosInstance
 
+    defaultHeader: object = {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+    }
+
     protected constructor(endpoint: string) {
         this.axiosClient = axios.create({
             baseURL: `${process.env.NEXT_PUBLIC_API_URL}/${endpoint}`,
-            headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+            headers: this.defaultHeader,
         })
     }
 
@@ -35,6 +40,7 @@ export abstract class AbstractClient<
     }
 
     public async updateEntity(entity: ApiLink, updated: T): Promise<T> {
+        delete updated['_links']
         return this.put(entity.href, updated)
     }
 
@@ -76,6 +82,7 @@ export abstract class AbstractClient<
             await axios<any>(url, {
                 data: JSON.stringify({ ...data }),
                 headers: {
+                    ...this.defaultHeader,
                     ...headers,
                 },
                 method: type,
