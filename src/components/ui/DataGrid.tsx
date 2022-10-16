@@ -148,11 +148,12 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 
 interface EnhancedTableToolbarProps {
     numSelected: number
+    selectedAction: () => void
     setOpen: (prop: ModalProp) => void
 }
 
 const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
-    const { numSelected, setOpen } = props
+    const { numSelected, selectedAction, setOpen } = props
 
     return (
         <Toolbar
@@ -182,7 +183,7 @@ const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
             {numSelected > 0 ? (
                 <Tooltip title='Delete'>
                     <IconButton>
-                        <Delete />
+                        <Delete onClick={selectedAction} />
                     </IconButton>
                 </Tooltip>
             ) : null}
@@ -224,7 +225,7 @@ export default function EnhancedTable() {
 
     const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.checked) {
-            const newSelected = rows.map((n) => n.name)
+            const newSelected = rows.map((n) => n._links.self.href)
             setSelected(newSelected)
             return
         }
@@ -273,6 +274,15 @@ export default function EnhancedTable() {
 
     const isSelected = (name: string) => selected.indexOf(name) !== -1
 
+    const onDeleteSelecteds = () => {
+        selected.map((item) => {
+            new PasswordClient().deleteEntity({ href: item }).then(() => {
+                loadPasswordList()
+            })
+        })
+        setSelected([])
+    }
+
     const onModalChange = (prop: ModalProp) => {
         setShowPassword(prop)
         if (prop.edited) {
@@ -284,7 +294,11 @@ export default function EnhancedTable() {
     return (
         <Box sx={{ display: 'flex', overflow: 'hidden' }}>
             <Paper sx={{ width: '100%' }}>
-                <EnhancedTableToolbar setOpen={onModalChange} numSelected={selected.length} />
+                <EnhancedTableToolbar
+                    setOpen={onModalChange}
+                    selectedAction={onDeleteSelecteds}
+                    numSelected={selected.length}
+                />
                 <PasswordModal show={showPassword} setOpen={onModalChange} />
                 <TableContainer sx={{ height: '80vh' }}>
                     <Table
