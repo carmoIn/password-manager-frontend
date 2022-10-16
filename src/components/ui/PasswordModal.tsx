@@ -1,10 +1,6 @@
 import * as React from 'react'
 import Button from '@mui/material/Button'
 import Dialog from '@mui/material/Dialog'
-import ListItemText from '@mui/material/ListItemText'
-import ListItem from '@mui/material/ListItem'
-import List from '@mui/material/List'
-import Divider from '@mui/material/Divider'
 import AppBar from '@mui/material/AppBar'
 import Toolbar from '@mui/material/Toolbar'
 import IconButton from '@mui/material/IconButton'
@@ -12,15 +8,13 @@ import Typography from '@mui/material/Typography'
 import CloseIcon from '@mui/icons-material/Close'
 import Slide from '@mui/material/Slide'
 import { TransitionProps } from '@mui/material/transitions'
-import PropTypes from 'prop-types'
 import TextField from '@mui/material/TextField'
 import { Backdrop, Box, CircularProgress, Container, InputAdornment } from '@mui/material'
-import { ApiLink } from '@/types/api-link.types'
 import { useEffect, useState } from 'react'
 import { ModalProp } from '@/interfaces/modal.interface'
-import { PasswordClient } from '@/client/password.client'
 import { Password } from '@/types/password.types'
 import { Visibility, VisibilityOff } from '@mui/icons-material'
+import PasswordService from '@/services/password.service'
 
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & {
@@ -43,7 +37,7 @@ export default function PasswordModal({ show, setOpen }: Props) {
 
     useEffect(() => {
         if (show.edited != null) {
-            new PasswordClient().get(show.edited).then((response) => {
+            PasswordService.get({ href: show.edited }).then((response) => {
                 response.password = atob(response.password)
                 console.log('chamou')
                 setItem(response)
@@ -66,13 +60,13 @@ export default function PasswordModal({ show, setOpen }: Props) {
             item.password = btoa(item.password)
 
             if (show.edited) {
-                new PasswordClient().updateEntity({ href: show.edited }, item).then((response) => {
+                PasswordService.update({ href: show.edited }, item).then((response) => {
                     setItem(response)
                     setLoading(false)
                     setOpen({ open: false, edited: response._links.self.href })
                 })
             } else {
-                new PasswordClient().createEntity(item).then((response) => {
+                PasswordService.create(item).then((response) => {
                     setItem(response)
                     setLoading(false)
                     setOpen({ open: false, edited: response._links.self.href })
