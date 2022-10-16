@@ -22,7 +22,7 @@ export default function Register() {
         event.preventDefault()
         console.log(registerUser)
         if (registerUser) {
-            UserService.login(registerUser).then(() => {
+            UserService.register(registerUser).then(() => {
                 router.push('/auth/login')
             })
         }

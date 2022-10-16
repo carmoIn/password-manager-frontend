@@ -1,6 +1,6 @@
 import Cookie from 'universal-cookie'
 import Router from 'next/router'
-import { FormLogin, TokenResponse } from '@/types/auth.types'
+import { FormLogin, FormRegister, TokenResponse } from '@/types/auth.types'
 import { AbstractService } from '@/services/abstract.service'
 import { User, UserCollection } from '@/types/user.types'
 import { UserClient } from '@/client/user.client'
@@ -25,6 +25,12 @@ class UserService extends AbstractService<User, UserCollection> {
 
                 return user
             })
+    }
+
+    public register(user: FormRegister) {
+        return new UserClient().register(user).then((user: FormRegister) => {
+            return user
+        })
     }
 
     public logout() {
