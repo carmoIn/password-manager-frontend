@@ -14,12 +14,13 @@ import Slide from '@mui/material/Slide'
 import { TransitionProps } from '@mui/material/transitions'
 import PropTypes from 'prop-types'
 import TextField from '@mui/material/TextField'
-import { Backdrop, Box, CircularProgress, Container } from '@mui/material'
+import { Backdrop, Box, CircularProgress, Container, InputAdornment } from '@mui/material'
 import { ApiLink } from '@/types/api-link.types'
 import { useEffect, useState } from 'react'
 import { ModalProp } from '@/interfaces/modal.interface'
 import { PasswordClient } from '@/client/password.client'
 import { Password } from '@/types/password.types'
+import { Visibility, VisibilityOff } from '@mui/icons-material'
 
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & {
@@ -38,12 +39,14 @@ interface Props {
 export default function PasswordModal({ show, setOpen }: Props) {
     const [loading, setLoading] = useState<boolean>(true)
     const [item, setItem] = useState<Password>(() => new Password())
+    const [showPassword, setShowPassword] = useState(false)
 
     useEffect(() => {
         if (show.edited != null) {
-            new PasswordClient().get(show.edited).then((password) => {
+            new PasswordClient().get(show.edited).then((response) => {
+                response.password = atob(response.password)
                 console.log('chamou')
-                setItem(password)
+                setItem(response)
                 setLoading(false)
             })
         } else {
@@ -63,19 +66,23 @@ export default function PasswordModal({ show, setOpen }: Props) {
             item.password = btoa(item.password)
 
             if (show.edited) {
-                new PasswordClient().updateEntity({ href: show.edited }, item).then((password) => {
-                    setItem(password)
+                new PasswordClient().updateEntity({ href: show.edited }, item).then((response) => {
+                    setItem(response)
                     setLoading(false)
-                    setOpen({ open: false, edited: password._links.self.href })
+                    setOpen({ open: false, edited: response._links.self.href })
                 })
             } else {
-                new PasswordClient().createEntity(item).then((password) => {
-                    setItem(password)
+                new PasswordClient().createEntity(item).then((response) => {
+                    setItem(response)
                     setLoading(false)
-                    setOpen({ open: false, edited: password._links.self.href })
+                    setOpen({ open: false, edited: response._links.self.href })
                 })
             }
         }
+    }
+
+    const handleClickShowPassword = () => {
+        setShowPassword(!showPassword)
     }
 
     const onModalChange = (prop: ModalProp): void => {
@@ -161,9 +168,22 @@ export default function PasswordModal({ show, setOpen }: Props) {
                                 fullWidth
                                 name='password'
                                 label='Senha'
-                                type='password'
+                                type={showPassword ? 'text' : 'password'}
                                 id='password'
                                 autoComplete='current-password'
+                                InputProps={{
+                                    endAdornment: (
+                                        <InputAdornment position='end'>
+                                            <IconButton
+                                                aria-label='toggle password visibility'
+                                                onClick={handleClickShowPassword}
+                                                edge='end'
+                                            >
+                                                {showPassword ? <VisibilityOff /> : <Visibility />}
+                                            </IconButton>
+                                        </InputAdornment>
+                                    ),
+                                }}
                                 value={item.password}
                                 onChange={(e) =>
                                     setItem({ ...item, password: e.target.value } as Password)
