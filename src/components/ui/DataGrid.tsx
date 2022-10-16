@@ -79,13 +79,7 @@ const headCells: readonly HeadCell[] = [
         label: 'Endereço do Site',
     },
     {
-        id: 'password',
-        numeric: true,
-        disablePadding: false,
-        label: 'Senha',
-    },
-    {
-        numeric: true,
+        numeric: false,
         disablePadding: false,
         label: 'Ações',
     },
@@ -367,10 +361,7 @@ export default function EnhancedTable() {
                                             >
                                                 {row.site}
                                             </TableCell>
-                                            <TableCell align='right'>
-                                                {atob(row.password as string)}
-                                            </TableCell>
-                                            <TableCell align='right'>
+                                            <TableCell align='left'>
                                                 <IconButton
                                                     onClick={(event) =>
                                                         handleClickEdit(event, row._links.self.href)
