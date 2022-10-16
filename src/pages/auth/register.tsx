@@ -11,7 +11,12 @@ import { useRouter } from 'next/router'
 
 export default function Register() {
     const router = useRouter()
-    const [registerUser, setRegisterUser] = React.useState<FormRegister>({})
+    const [registerUser, setRegisterUser] = React.useState<FormRegister>({
+        name: '',
+        username: '',
+        email: '',
+        password: '',
+    })
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
@@ -35,7 +40,7 @@ export default function Register() {
                     name='name'
                     autoComplete='fname'
                     value={registerUser.name}
-                    onChange={e => setRegisterUser({...registerUser, name: e.target.value })}
+                    onChange={(e) => setRegisterUser({ ...registerUser, name: e.target.value })}
                     autoFocus
                 />
                 <TextField
@@ -47,7 +52,7 @@ export default function Register() {
                     name='email'
                     autoComplete='email'
                     value={registerUser.email}
-                    onChange={e => setRegisterUser({...registerUser, email: e.target.value })}
+                    onChange={(e) => setRegisterUser({ ...registerUser, email: e.target.value })}
                     autoFocus
                 />
                 <TextField
@@ -58,7 +63,7 @@ export default function Register() {
                     label='Usuário'
                     name='username'
                     value={registerUser.username}
-                    onChange={e => setRegisterUser({...registerUser, username: e.target.value })}
+                    onChange={(e) => setRegisterUser({ ...registerUser, username: e.target.value })}
                     autoComplete='fname'
                 />
                 <TextField
@@ -70,7 +75,7 @@ export default function Register() {
                     type='password'
                     id='password'
                     value={registerUser.password}
-                    onChange={e => setRegisterUser({...registerUser, password: e.target.value })}
+                    onChange={(e) => setRegisterUser({ ...registerUser, password: e.target.value })}
                     autoComplete='current-password'
                 />
                 <Button type='submit' fullWidth variant='contained' sx={{ mt: 3, mb: 2 }}>
