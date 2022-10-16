@@ -108,16 +108,14 @@ export abstract class AbstractClient<
         ).data
     }
 
-    private handleResponse(response) {
-        console.log(response)
-        const data = response
+    private handleResponse(result) {
+        const response = result.response
+        const data = response.data
 
         if (!response.ok) {
             if ([401, 403].includes(response.status) && UserService.getAuthenticatedToken()) {
-                // auto logout if 401 Unauthorized or 403 Forbidden response returned from api
                 UserService.logout()
             }
-
             const error = (data && data.message) || response.statusText
             return Promise.reject(error)
         }

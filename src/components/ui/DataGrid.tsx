@@ -21,7 +21,7 @@ import PasswordModal from '@/components/ui/PasswordModal'
 import { Password } from '@/types/password.types'
 import { ModalProp } from '@/interfaces/modal.interface'
 import { useEffect, useState } from 'react'
-import { PasswordClient } from '@/client/password.client'
+import PasswordService from '@/services/password.service'
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
     if (b[orderBy] < a[orderBy]) {
@@ -79,13 +79,7 @@ const headCells: readonly HeadCell[] = [
         label: 'Endereço do Site',
     },
     {
-        id: 'password',
-        numeric: true,
-        disablePadding: false,
-        label: 'Senha',
-    },
-    {
-        numeric: true,
+        numeric: false,
         disablePadding: false,
         label: 'Ações',
     },
@@ -212,7 +206,7 @@ export default function EnhancedTable() {
     }, [])
 
     function loadPasswordList() {
-        new PasswordClient().list().then((passwords) => {
+        PasswordService.getAll().then((passwords) => {
             setRows(passwords?._embedded.passwords || new Array<Password>())
         })
     }
@@ -238,7 +232,7 @@ export default function EnhancedTable() {
     }
 
     const handleClickDelete = (event: React.MouseEvent<unknown>, name: string) => {
-        new PasswordClient().deleteEntity({ href: name }).then(() => {
+        PasswordService.delete({ href: name }).then(() => {
             loadPasswordList()
         })
     }
@@ -276,7 +270,7 @@ export default function EnhancedTable() {
 
     const onDeleteSelecteds = () => {
         selected.map((item) => {
-            new PasswordClient().deleteEntity({ href: item }).then(() => {
+            PasswordService.delete({ href: item }).then(() => {
                 loadPasswordList()
             })
         })
@@ -367,10 +361,7 @@ export default function EnhancedTable() {
                                             >
                                                 {row.site}
                                             </TableCell>
-                                            <TableCell align='right'>
-                                                {atob(row.password as string)}
-                                            </TableCell>
-                                            <TableCell align='right'>
+                                            <TableCell align='left'>
                                                 <IconButton
                                                     onClick={(event) =>
                                                         handleClickEdit(event, row._links.self.href)

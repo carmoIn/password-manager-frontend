@@ -8,26 +8,43 @@ import { Layout } from '@/components/accounts'
 import UserService from '@/services/user.service'
 import { FormLogin } from '@/types/auth.types'
 import { useRouter } from 'next/router'
+import { Alert } from '@mui/material'
 
 export default function Login() {
     const router = useRouter()
 
-    const [login, setLogin] = React.useState<FormLogin>({})
+    const [error, setError] = React.useState<string>('')
+
+    const [login, setLogin] = React.useState<FormLogin>({
+        username: '',
+        password: '',
+    })
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
         console.log(login)
         if (login.password && login.username) {
-            UserService.login(login).then(() => {
-                const returnUrl = router.query.returnUrl || '/'
-                router.push(returnUrl.toString())
-            })
+            UserService.login(login)
+                .then(() => {
+                    const returnUrl = router.query.returnUrl || '/'
+                    router.push(returnUrl.toString())
+                })
+                .catch((error) => {
+                    setError(error)
+                })
         }
     }
 
     return (
         <Layout>
             <Box component='form' noValidate onSubmit={handleSubmit} sx={{ mt: 1 }}>
+                {error ? (
+                    <Alert variant='outlined' severity='error'>
+                        {error}
+                    </Alert>
+                ) : (
+                    ''
+                )}
                 <TextField
                     margin='normal'
                     required
@@ -37,7 +54,7 @@ export default function Login() {
                     name='username'
                     autoComplete='fname'
                     value={login.username}
-                    onChange={e => setLogin({...login, username: e.target.value })}
+                    onChange={(e) => setLogin({ ...login, username: e.target.value })}
                     autoFocus
                 />
                 <TextField
@@ -49,7 +66,7 @@ export default function Login() {
                     type='password'
                     id='password'
                     value={login.password}
-                    onChange={e => setLogin({...login, password: e.target.value })}
+                    onChange={(e) => setLogin({ ...login, password: e.target.value })}
                     autoComplete='current-password'
                 />
                 <Button type='submit' fullWidth variant='contained' sx={{ mt: 3, mb: 2 }}>

@@ -1,7 +1,6 @@
 import React from 'react'
 import { Box, AppBar, IconButton, Menu, MenuItem, Toolbar, Typography } from '@mui/material'
 import { AccountCircle } from '@mui/icons-material'
-import { UserClient } from '@/client/user.client'
 import UserService from '@/services/user.service'
 
 function NabBar() {
