@@ -15,12 +15,10 @@ import Paper from '@mui/material/Paper'
 import Checkbox from '@mui/material/Checkbox'
 import IconButton from '@mui/material/IconButton'
 import Tooltip from '@mui/material/Tooltip'
-import DeleteIcon from '@mui/icons-material/Delete'
-import { AddBox } from '@mui/icons-material'
+import { AddBox, Edit, Delete } from '@mui/icons-material'
 import { visuallyHidden } from '@mui/utils'
 import PasswordModal from '@/components/ui/PasswordModal'
-import { Password, PasswordCollection } from '@/types/password.types'
-import { ApiLink } from '@/types/api-link.types'
+import { Password } from '@/types/password.types'
 import { ModalProp } from '@/interfaces/modal.interface'
 import { useEffect, useState } from 'react'
 import { PasswordClient } from '@/client/password.client'
@@ -62,7 +60,7 @@ function stableSort<T>(array: readonly T[], comparator: (a: T, b: T) => number) 
 
 interface HeadCell {
     disablePadding: boolean
-    id: keyof Password
+    id?: keyof Password
     label: string
     numeric: boolean
 }
@@ -85,6 +83,11 @@ const headCells: readonly HeadCell[] = [
         numeric: true,
         disablePadding: false,
         label: 'Senha',
+    },
+    {
+        numeric: true,
+        disablePadding: false,
+        label: 'Ações',
     },
 ]
 
@@ -179,16 +182,15 @@ const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
             {numSelected > 0 ? (
                 <Tooltip title='Delete'>
                     <IconButton>
-                        <DeleteIcon />
+                        <Delete />
                     </IconButton>
                 </Tooltip>
-            ) : (
-                <Tooltip title='Nova Senha'>
-                    <IconButton>
-                        <AddBox onClick={() => setOpen({ open: true, edited: null })} />
-                    </IconButton>
-                </Tooltip>
-            )}
+            ) : null}
+            <Tooltip title='Nova Senha'>
+                <IconButton>
+                    <AddBox onClick={() => setOpen({ open: true, edited: null })} />
+                </IconButton>
+            </Tooltip>
         </Toolbar>
     )
 }
@@ -229,12 +231,20 @@ export default function EnhancedTable() {
         setSelected([])
     }
 
-    const handleClick = (event: React.MouseEvent<unknown>, name: string) => {
-        const selectedIndex = selected.indexOf(name)
-        let newSelected: readonly string[] = []
-
+    const handleClickEdit = (event: React.MouseEvent<unknown>, name: string) => {
         setShowPassword({ open: true, edited: name })
         console.log('abriu modal')
+    }
+
+    const handleClickDelete = (event: React.MouseEvent<unknown>, name: string) => {
+        new PasswordClient().deleteEntity({ href: name }).then(() => {
+            loadPasswordList()
+        })
+    }
+
+    const handleClickCheck = (event: React.MouseEvent<unknown>, name: string) => {
+        const selectedIndex = selected.indexOf(name)
+        let newSelected: readonly string[] = []
 
         if (selectedIndex === -1) {
             newSelected = newSelected.concat(selected, name)
@@ -312,7 +322,10 @@ export default function EnhancedTable() {
                                             <TableCell padding='checkbox'>
                                                 <Checkbox
                                                     onClick={(event) =>
-                                                        handleClick(event, row._links.self.href)
+                                                        handleClickCheck(
+                                                            event,
+                                                            row._links.self.href,
+                                                        )
                                                     }
                                                     color='primary'
                                                     checked={isItemSelected}
@@ -326,12 +339,41 @@ export default function EnhancedTable() {
                                                 id={labelId}
                                                 scope='row'
                                                 padding='none'
+                                                onClick={(event) =>
+                                                    handleClickEdit(event, row._links.self.href)
+                                                }
                                             >
                                                 {row.name}
                                             </TableCell>
-                                            <TableCell align='left'>{row.site}</TableCell>
+                                            <TableCell
+                                                align='left'
+                                                onClick={(event) =>
+                                                    handleClickEdit(event, row._links.self.href)
+                                                }
+                                            >
+                                                {row.site}
+                                            </TableCell>
                                             <TableCell align='right'>
                                                 {atob(row.password as string)}
+                                            </TableCell>
+                                            <TableCell align='right'>
+                                                <IconButton
+                                                    onClick={(event) =>
+                                                        handleClickEdit(event, row._links.self.href)
+                                                    }
+                                                >
+                                                    <Edit color='primary' />
+                                                </IconButton>
+                                                <IconButton
+                                                    onClick={(event) =>
+                                                        handleClickDelete(
+                                                            event,
+                                                            row._links.self.href,
+                                                        )
+                                                    }
+                                                >
+                                                    <Delete color='primary' />
+                                                </IconButton>
                                             </TableCell>
                                         </TableRow>
                                     )
@@ -340,7 +382,7 @@ export default function EnhancedTable() {
                     </Table>
                 </TableContainer>
                 <TablePagination
-                    rowsPerPageOptions={[5, 10, 25]}
+                    rowsPerPageOptions={[5, 10, 15, 25]}
                     component='div'
                     count={rows.length}
                     rowsPerPage={rowsPerPage}
