@@ -31,7 +31,7 @@ class UserService extends AbstractService<User, UserCollection> {
         // remove user from local storage, publish null to user subscribers and redirect to login page
         const cookies = new Cookie()
         cookies.remove('token')
-        Router.push('/login')
+        Router.push('/auth/login')
     }
 }
 
